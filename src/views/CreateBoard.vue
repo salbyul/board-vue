@@ -1,12 +1,154 @@
+<script>
+import axios from 'axios'
+
+export default {
+  data() {
+    return {
+      categories: [],
+      createObject: {
+        categoryId: 'null',
+        writer: '',
+        title: '',
+        password: '',
+        content: ''
+      }
+    }
+  },
+  methods: {
+    submit() {
+      if (!this.verify()) return
+
+      const data = new FormData()
+      const createObjectJson = JSON.stringify(this.createObject)
+      const blob = new Blob([createObjectJson], { type: 'application/json' })
+      data.append('boardCreateDTO', blob)
+
+      const fileOne = document.getElementById('fileOne')
+      const fileTwo = document.getElementById('fileTwo')
+      const fileThree = document.getElementById('fileThree')
+      const fileList = [fileOne, fileTwo, fileThree]
+
+      fileList.forEach((file) => {
+        if (file !== undefined) {
+          data.append('files', file.files[0])
+        }
+      })
+
+      axios
+        .put('/board/create', data)
+        .then((response) => {
+          console.log(response)
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    },
+    verify() {
+      if (!this.verifyCategory()) return false
+      if (!this.verifyWriter()) return false
+      if (!this.verifyPassowrd()) return false
+      if (!this.verifyTitle()) return false
+      if (!this.verifyContent()) return false
+      return true
+    },
+    verifyCategory() {
+      const category = this.createObject.categoryId
+      if (category === 'null') {
+        alert('카테고리를 선택해주세요.')
+        return false
+      }
+      return true
+    },
+    verifyWriter() {
+      const writer = this.createObject.writer
+      if (writer.length < 3 || writer.length > 4) {
+        alert('작성자는 3글자 이상, 5글자 미만이어야 합니다.')
+        return false
+      }
+      return true
+    },
+    verifyPassowrd() {
+      const password = this.createObject.password
+      const passwordVerify = document.getElementById('passwordVerify').value
+      if (password.length < 4 || password.length > 15) {
+        alert('비밀번호는 4글자 이상, 16글자 미만이어야 합니다.')
+        return false
+      }
+      if (password !== passwordVerify) {
+        alert('비밀번호가 같지 않습니다.')
+        return false
+      }
+      return true
+    },
+    verifyTitle() {
+      const title = this.createObject.title
+      if (title.length < 4 || title.length > 99) {
+        alert('제목은 4글자 이상, 100글자 미만이어야 합니다.')
+        return false
+      }
+      return true
+    },
+    verifyContent() {
+      const content = this.createObject.content
+      if (content.length < 4 || content.length > 1999) {
+        alert('내용은 4글자 이상, 2000글자 미만이어야 합니다.')
+        return false
+      }
+      return true
+    },
+    onFileChange(index) {
+      if (index === 1) {
+        const fileInput = document.getElementById('fileOneName')
+        const fileOne = document.getElementById('fileOne')
+        fileInput.value = fileOne.files[0].name
+      } else if (index === 2) {
+        const fileInput = document.getElementById('fileTwoName')
+        const fileTwo = document.getElementById('fileTwo')
+        fileInput.value = fileTwo.files[0].name
+      } else if (index === 3) {
+        const fileInput = document.getElementById('fileThreeName')
+        const fileThree = document.getElementById('fileThree')
+        fileInput.value = fileThree.files[0].name
+      }
+    }
+  },
+  beforeMount() {
+    axios
+      .get('http://localhost:8080/board/create')
+      .then((response) => {
+        console.log(response)
+        this.categories = response.data.categories
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
+}
+</script>
+
 <template>
   <div>
     <div>
       <div class="flex border-y">
-        <div class="bg-gray-100 w-2/12 py-1 pl-2">카테고리</div>
+        <div class="bg-gray-100 w-2/12 py-1 pl-2">
+          카테고리
+          <button type="button" class="px-3 py-1.5 border bg-blue-100" @click="hi">Button</button>
+        </div>
         <div class="py-1 w-9/12">
-          <select name="category" class="border ml-3 w-44" id="category">
+          <select
+            name="category"
+            class="border ml-3 w-44"
+            id="category"
+            v-model="createObject.categoryId"
+          >
             <option value="null">카테고리 선택</option>
-            <!-- 카테고리 목록 가져와야 됨 -->
+            <option
+              v-for="category in categories"
+              :key="category.categoryId"
+              :value="category.categoryId"
+            >
+              {{ category.name }}
+            </option>
           </select>
         </div>
       </div>
@@ -15,7 +157,13 @@
       <div class="flex border-b">
         <div class="bg-gray-100 w-2/12 py-1 pl-2">작성자</div>
         <div class="py-1 w-9/12">
-          <input type="text" name="writer" class="border pl-1 ml-3 w-44" id="writer" />
+          <input
+            type="text"
+            name="writer"
+            class="border pl-1 ml-3 w-44"
+            id="writer"
+            v-model="createObject.writer"
+          />
         </div>
       </div>
     </div>
@@ -30,12 +178,27 @@
           placeholder="비밀번호"
           class="border pl-1 ml-3 w-44"
           id="password"
+          v-model="createObject.password"
         />
         <input
           type="password"
           placeholder="비밀번호 확인"
           class="border pl-1 ml-3 w-44"
           id="passwordVerify"
+        />
+      </div>
+    </div>
+
+    <!-- 제목 -->
+    <div class="flex border-b">
+      <div class="bg-gray-100 w-2/12 py-1 pl-2">제목</div>
+      <div class="py-1 w-9/12">
+        <input
+          type="text"
+          name="title"
+          class="border pl-1 ml-3 w-full"
+          id="title"
+          v-model="createObject.title"
         />
       </div>
     </div>
@@ -50,6 +213,7 @@
           class="resize-none w-full border pl-1 ml-3 h-32"
           name="content"
           id="content"
+          v-model="createObject.content"
         ></textarea>
       </div>
     </div>
@@ -71,7 +235,7 @@
             id="fileOne"
             name="file"
             hidden
-            onchange="onFileChange(1)"
+            @change="onFileChange(1)"
           />
         </div>
         <div class="my-1">
@@ -85,7 +249,7 @@
             id="fileTwo"
             name="file"
             hidden
-            onchange="onFileChange(2)"
+            @change="onFileChange(2)"
           />
         </div>
         <div class="my-1">
@@ -99,7 +263,7 @@
             id="fileThree"
             name="file"
             hidden
-            onchange="onFileChange(3)"
+            @change="onFileChange(3)"
           />
         </div>
       </div>
@@ -107,11 +271,13 @@
   </div>
   <br />
   <div class="flex justify-between">
-    <button class="px-5 rounded-sm border">취소</button>
-    <button type="button" class="px-5 rounded-sm border bg-gray-100 hover:cursor-pointer">
+    <button class="px-5 rounded-sm border" @click="() => this.$router.go(-1)">취소</button>
+    <button
+      type="button"
+      class="px-5 rounded-sm border bg-gray-100 hover:cursor-pointer"
+      @click="submit"
+    >
       저장
     </button>
   </div>
 </template>
-
-<script></script>
