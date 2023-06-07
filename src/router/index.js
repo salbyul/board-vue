@@ -16,6 +16,11 @@ const router = createRouter({
       path: '/create',
       name: 'create',
       component: CreateBoard
+    },
+    {
+      path: '/detail/:id',
+      name: 'detail',
+      component: BoardDetail
     }
   ]
 })

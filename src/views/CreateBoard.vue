@@ -34,13 +34,32 @@ export default {
         }
       })
 
+      const params = new URLSearchParams(location.search)
+      data.append('startDate', params.get('startDate'))
+      data.append('endDate', params.get('endDate'))
+      data.append('category', params.get('category'))
+      data.append('search', params.get('search'))
+
       axios
         .put('/board/create', data)
         .then((response) => {
-          console.log(response)
+          const id = response.data.boardId
+          this.$router.push({
+            path: `/detail/${id}`,
+            query: {
+              startDate: this.$route.query.startDate,
+              endDate: this.$route.query.endDate,
+              category: this.$route.query.category,
+              search: this.$route.query.search,
+              page: this.$route.query.page
+            }
+          })
         })
         .catch((error) => {
-          console.log(error)
+          const data = error.response.data
+          if (data.errorCode === 612) {
+            alert('파일 이름이 존재하지 않습니다.')
+          }
         })
     },
     verify() {
@@ -61,7 +80,7 @@ export default {
     },
     verifyWriter() {
       const writer = this.createObject.writer
-      if (writer.length < 3 || writer.length > 4) {
+      if (writer.length < 3 || writer.length >= 5) {
         alert('작성자는 3글자 이상, 5글자 미만이어야 합니다.')
         return false
       }
@@ -130,10 +149,7 @@ export default {
   <div>
     <div>
       <div class="flex border-y">
-        <div class="bg-gray-100 w-2/12 py-1 pl-2">
-          카테고리
-          <button type="button" class="px-3 py-1.5 border bg-blue-100" @click="hi">Button</button>
-        </div>
+        <div class="bg-gray-100 w-2/12 py-1 pl-2">카테고리</div>
         <div class="py-1 w-9/12">
           <select
             name="category"

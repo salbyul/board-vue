@@ -2,24 +2,6 @@
 import axios from 'axios'
 import BoardSmall from '../components/BoardSmall.vue'
 export default {
-  props: {
-    startDate: {
-      type: String,
-      default: null
-    },
-    endDate: {
-      type: String,
-      default: null
-    },
-    category: {
-      type: String,
-      default: 'all'
-    },
-    search: {
-      type: String,
-      default: ''
-    }
-  },
   components: {
     BoardSmall
   },
@@ -30,7 +12,7 @@ export default {
         endDate: '',
         search: '',
         category: 'all',
-        offset: 0,
+        page: 0,
         limit: 10
       },
       boardCounts: 0,
@@ -70,8 +52,8 @@ export default {
             : inputEndDate.value,
         category: inputCategory.value,
         search: inputSearch.value.trim(),
-        offset: 0,
-        limit: 10
+        page: this.condition.page,
+        limit: this.condition.limit
       }
       axios
         .get('/board/list', { params: searchCondition })
@@ -79,6 +61,11 @@ export default {
           const data = response.data
           this.boardCounts = data.boardCounts
           this.boards = data.boardDTOs
+          this.condition.startDate = searchCondition.startDate
+          this.condition.endDate = searchCondition.endDate
+          this.condition.category = searchCondition.category
+          this.condition.search = searchCondition.search
+          this.condition.page = searchCondition.page
         })
         .catch((error) => {
           console.log(error)
@@ -98,6 +85,7 @@ export default {
       this.condition.endDate = urlParams.get('endDate')
     } else {
       const endDate = new Date()
+      endDate.setDate(endDate.getDate() + 1)
       this.condition.endDate = makeDate(endDate)
     }
     if (urlParams.has('search')) {
@@ -109,8 +97,7 @@ export default {
     if (urlParams.has('offset')) {
       this.condition.offset = urlParams.get('offset')
     }
-  },
-  mounted() {
+
     axios
       .get('http://localhost:8080/board/list', { params: this.condition })
       .then((response) => {
@@ -193,7 +180,12 @@ const makeDate = (date) => {
             </tr>
           </thead>
           <tbody>
-            <BoardSmall v-for="board in boards" :key="board.id" :board="board" />
+            <BoardSmall
+              v-for="board in boards"
+              :key="board.id"
+              :board="board"
+              :condition="this.condition"
+            />
           </tbody>
         </table>
       </div>
