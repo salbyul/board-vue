@@ -13,10 +13,40 @@ export default {
       title: '',
       views: 0,
       writer: '',
-      passwordForDelete: ''
+      passwordForDelete: '',
+      passwordForModify: ''
     }
   },
   methods: {
+    modifyBoard() {
+      const form = new FormData()
+      form.append('boardId', this.$route.params.id)
+      form.append('password', this.passwordForModify)
+      axios
+        .post(`/board/modify`, form)
+        .then((response) => {
+          this.$router.push({
+            name: 'modify',
+            query: {
+              startDate: this.$route.query.startDate,
+              endDate: this.$route.query.endDate,
+              category: this.$route.query.category,
+              search: this.$route.query.search,
+              page: this.$route.query.page,
+              certification: response.data.encryptedPassword
+            },
+            params: {
+              id: this.$route.params.id
+            }
+          })
+        })
+        .catch((error) => {
+          const data = error.response.data
+          if (data.errorCode === 405) {
+            alert('비밀번호를 확인해주세요.')
+          }
+        })
+    },
     deleteBoard() {
       axios
         .delete(`/board/delete/${this.$route.params.id}?password=${this.passwordForDelete}`)
@@ -46,7 +76,6 @@ export default {
           responseType: 'blob'
         })
         .then((response) => {
-          console.log(response)
           const name = response.headers['content-disposition']
             .split('filename=')[1]
             .replace(/"/g, '')
@@ -59,10 +88,9 @@ export default {
           link.click()
           link.remove()
         })
-        .catch((error) => [console.log(error)])
+        .catch(() => [])
     },
     transferToHome() {
-      console.log(this.$route)
       this.$router.push({
         path: '/',
         query: {
@@ -100,7 +128,6 @@ export default {
     axios
       .get(`/board/detail/${this.$route.params.id}`)
       .then((response) => {
-        console.log(response)
         const data = response.data.boardDTO
         this.category = data.category
         this.comments = data.commentDTOs
@@ -120,9 +147,7 @@ export default {
         this.views = data.views
         this.writer = data.writer
       })
-      .catch((error) => {
-        console.log(error)
-      })
+      .catch(() => {})
   }
 }
 </script>
@@ -130,10 +155,10 @@ export default {
   <div class="h-screen">
     <!-- 제목 -->
     <div class="border-b-2 pb-3 mb-3">
-      <dlv class="flex justify-between text-sm text-gray-600 mb-5">
+      <div class="flex justify-between text-sm text-gray-600 mb-5">
         <div>{{ writer }}</div>
         <div>등록일시 {{ generationTimestamp }} 수정일시 {{ modificationTimestamp }}</div>
-      </dlv>
+      </div>
       <div class="flex justify-between text-gray-700">
         <div class="flex">
           <div class="mr-4">[{{ category }}]</div>
@@ -210,13 +235,14 @@ export default {
       placeholder="비밀번호를 입력해주세요."
       class="pl-1 border w-5/12"
       name="password"
+      v-model="passwordForModify"
     />
     <br />
     <div class="flex justify-evenly my-10">
       <button type="button" class="bg-gray-100 px-3 py-1" @click="changeVisibilityPopup('modify')">
         취소
       </button>
-      <button type="button" class="bg-gray-100 px-3 py-1">확인</button>
+      <button type="button" class="bg-gray-100 px-3 py-1" @click="modifyBoard">확인</button>
     </div>
   </div>
 

@@ -34,12 +34,6 @@ export default {
         }
       })
 
-      const params = new URLSearchParams(location.search)
-      data.append('startDate', params.get('startDate'))
-      data.append('endDate', params.get('endDate'))
-      data.append('category', params.get('category'))
-      data.append('search', params.get('search'))
-
       axios
         .put('/board/create', data)
         .then((response) => {
@@ -135,12 +129,9 @@ export default {
     axios
       .get('http://localhost:8080/board/create')
       .then((response) => {
-        console.log(response)
         this.categories = response.data.categories
       })
-      .catch((error) => {
-        console.log(error)
-      })
+      .catch(() => {})
   }
 }
 </script>

@@ -67,9 +67,7 @@ export default {
           this.condition.search = searchCondition.search
           this.condition.page = searchCondition.page
         })
-        .catch((error) => {
-          console.log(error)
-        })
+        .catch(() => {})
     }
   },
   beforeMount() {
@@ -106,9 +104,7 @@ export default {
         this.boards = data.boardDTOs
         this.categoryNames = data.categoryNames
       })
-      .catch((error) => {
-        console.log(error)
-      })
+      .catch(() => {})
   }
 }
 const makeDate = (date) => {
