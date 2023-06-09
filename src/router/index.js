@@ -25,8 +25,7 @@ const router = createRouter({
     {
       path: '/modify/:id',
       name: 'modify',
-      component: ModifyBoard,
-      props: true
+      component: ModifyBoard
     }
   ]
 })

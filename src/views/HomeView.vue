@@ -1,9 +1,12 @@
 <script>
 import axios from 'axios'
 import BoardSmall from '../components/BoardSmall.vue'
+import '@ocrv/vue-tailwind-pagination/styles'
+import VueTailwindPagination from '@ocrv/vue-tailwind-pagination'
 export default {
   components: {
-    BoardSmall
+    BoardSmall,
+    VueTailwindPagination
   },
   data() {
     return {
@@ -17,10 +20,15 @@ export default {
       },
       boardCounts: 0,
       boards: [],
-      categoryNames: []
+      categoryNames: [],
+      perPage: 10
     }
   },
   methods: {
+    onPageClick(event) {
+      this.condition.page = event - 1
+      this.doSearch()
+    },
     transferToCreatePage() {
       this.$router.push({
         path: '/create',
@@ -41,6 +49,10 @@ export default {
       const startDate = new Date()
       startDate.setFullYear(startDate.getFullYear() - 1)
 
+      if (isNaN(Number.parseInt(this.condition.page))) {
+        this.condition.page = 0
+      }
+
       const searchCondition = {
         startDate:
           inputStartDate.value === null || inputStartDate.value === ''
@@ -60,7 +72,7 @@ export default {
         .then((response) => {
           const data = response.data
           this.boardCounts = data.boardCounts
-          this.boards = data.boardDTOs
+          this.boards = data.boardDTOsForList
           this.condition.startDate = searchCondition.startDate
           this.condition.endDate = searchCondition.endDate
           this.condition.category = searchCondition.category
@@ -92,16 +104,19 @@ export default {
     if (urlParams.has('category')) {
       this.condition.category = urlParams.get('category')
     }
-    if (urlParams.has('offset')) {
-      this.condition.offset = urlParams.get('offset')
+    if (urlParams.has('page')) {
+      this.condition.page = urlParams.get('page')
     }
 
+    if (isNaN(Number.parseInt(this.condition.page))) {
+      this.condition.page = 0
+    }
     axios
       .get('http://localhost:8080/board/list', { params: this.condition })
       .then((response) => {
         const data = response.data
         this.boardCounts = data.boardCounts
-        this.boards = data.boardDTOs
+        this.boards = data.boardDTOsForList
         this.categoryNames = data.categoryNames
       })
       .catch(() => {})
@@ -187,7 +202,15 @@ const makeDate = (date) => {
       </div>
     </div>
     <br />
-    <!-- 페이지네이션 섹션 -->
+    <div>
+      <!-- Pagination -->
+      <VueTailwindPagination
+        :current="isNaN(Number.parseInt(condition.page)) ? 1 : Number.parseInt(condition.page) + 1"
+        :total="boardCounts"
+        :per-page="perPage"
+        @page-changed="onPageClick($event)"
+      />
+    </div>
     <div class="flex justify-end">
       <button
         type="button"

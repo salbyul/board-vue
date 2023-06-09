@@ -25,6 +25,7 @@ export default {
       axios
         .post(`/board/modify`, form)
         .then((response) => {
+          console.log(response)
           this.$router.push({
             name: 'modify',
             query: {
@@ -33,7 +34,7 @@ export default {
               category: this.$route.query.category,
               search: this.$route.query.search,
               page: this.$route.query.page,
-              certification: response.data.encryptedPassword
+              uuid: response.data.uuid
             },
             params: {
               id: this.$route.params.id
@@ -128,7 +129,7 @@ export default {
     axios
       .get(`/board/detail/${this.$route.params.id}`)
       .then((response) => {
-        const data = response.data.boardDTO
+        const data = response.data.boardDetail
         this.category = data.category
         this.comments = data.commentDTOs
         this.content = data.content

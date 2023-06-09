@@ -18,13 +18,10 @@ export default {
     }
   },
   beforeMount() {
-    const certification = {
-      encryptedPassword: this.$route.query.certification
-    }
     axios
-      .get(`/board/modify/${this.$route.params.id}`, { params: certification })
+      .get(`/board/modify/${this.$route.params.id}?uuid=${this.$route.query.uuid}`)
       .then((response) => {
-        const data = response.data.boardDTO
+        const data = response.data.boardDetail
         this.category = data.category
         this.content = data.content
         let fileCounts = 0
