@@ -14,16 +14,32 @@ export default {
       views: 0,
       writer: '',
       passwordForDelete: '',
-      passwordForModify: ''
+      passwordForModify: '',
+      comment: {
+        writer: '',
+        content: '',
+        boardId: this.$route.params.id
+      }
     }
   },
   methods: {
+    createComment() {
+      axios
+        .post('/comment/create', this.comment)
+        .then((response) => {
+          console.log(response)
+          window.location.reload()
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    },
     modifyBoard() {
       const form = new FormData()
       form.append('boardId', this.$route.params.id)
       form.append('password', this.passwordForModify)
       axios
-        .post(`/board/modify`, form)
+        .put(`/board/modify`, form)
         .then((response) => {
           console.log(response)
           this.$router.push({
@@ -33,8 +49,7 @@ export default {
               endDate: this.$route.query.endDate,
               category: this.$route.query.category,
               search: this.$route.query.search,
-              page: this.$route.query.page,
-              uuid: response.data.uuid
+              page: this.$route.query.page
             },
             params: {
               id: this.$route.params.id
@@ -199,6 +214,7 @@ export default {
               class="border pl-1 mb-1"
               name="writer"
               id="writer"
+              v-model="comment.writer"
             />
           </div>
           <div class="flex">
@@ -206,8 +222,14 @@ export default {
               class="resize-none border h-20 pl-1 w-11/12"
               name="content"
               id="content"
+              v-model="comment.content"
             ></textarea>
-            <button class="border w-1/12 h-20 rounded-sm hover:cursor-pointer">등록</button>
+            <button
+              class="border w-1/12 h-20 rounded-sm hover:cursor-pointer"
+              @click="createComment"
+            >
+              등록
+            </button>
           </div>
         </div>
       </div>

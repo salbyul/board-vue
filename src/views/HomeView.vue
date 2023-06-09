@@ -202,8 +202,9 @@ const makeDate = (date) => {
       </div>
     </div>
     <br />
+
+    <!-- Pagination -->
     <div>
-      <!-- Pagination -->
       <VueTailwindPagination
         :current="isNaN(Number.parseInt(condition.page)) ? 1 : Number.parseInt(condition.page) + 1"
         :total="boardCounts"

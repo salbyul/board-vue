@@ -192,7 +192,7 @@ export default {
       })
 
       axios
-        .post(`/board/modify/${this.$route.params.id}`, form)
+        .put(`/board/modify/${this.$route.params.id}`, form)
         .then(() => {
           alert('수정되었습니다.')
           this.$router.push({

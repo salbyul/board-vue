@@ -35,7 +35,7 @@ export default {
       })
 
       axios
-        .put('/board/create', data)
+        .post('/board/create', data)
         .then((response) => {
           const id = response.data.boardId
           this.$router.push({
